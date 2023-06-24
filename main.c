@@ -20,6 +20,7 @@
 
 int main (int argc, char **argv)
 {
+  // some test print
   g_print("Hello here is OpenMineSweeper!\n");
   return 0;
 }
