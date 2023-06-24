@@ -1,22 +1,67 @@
-/*
- * main.c
+/*!
+ * @file main.c
+ * @author JustTheBek
  *
- *  Created on: June 24, 2023
- *      Author: JustTheBek
- *  An open source minesweeper implementation using C and GTK .
+ * @brief Main file of the OpenMineSweeper game.
+ * @details
+ * This file is only used to define app entry and exit points, the functionalities
+ * are implemented in the linked component libraries according to the architecture.
+ *
+ * Created on: June 24, 2023
+ *
+ * @ingroup main
+ * @{
+ */
+
+/*
+ **********************************************************************
+ * INCLUDES
+ **********************************************************************
  */
 
 #include <glib.h>
 
-// C library headers
-#include <stdio.h>
-#include <string.h>
+/*
+ **********************************************************************
+ * DEFINES
+ **********************************************************************
+ */
 
-// Linux headers TODO: delete them after OOP impl ready
-#include <unistd.h> // write(), read(), close()
+/*
+ **********************************************************************
+ * LOCAL MACROS
+ **********************************************************************
+ */
 
+/*
+ **********************************************************************
+ * LOCAL DATA TYPES/STRUCTS/ENUMS
+ **********************************************************************
+ */
 
+/*
+ **********************************************************************
+ * LOCAL CONSTANTS
+ **********************************************************************
+ */
 
+/*
+ **********************************************************************
+ * LOCAL VARIABLES
+ **********************************************************************
+ */
+
+/*
+ **********************************************************************
+ * LOCAL FUNCTION PROTOTYPES
+ **********************************************************************
+ */
+
+/*
+ **********************************************************************
+ * FUNCTION IMPLEMENTATIONS
+ **********************************************************************
+ */
 
 int main (int argc, char **argv)
 {
@@ -24,3 +69,5 @@ int main (int argc, char **argv)
   g_print("Hello here is OpenMineSweeper!\n");
   return 0;
 }
+
+/*! @} */
