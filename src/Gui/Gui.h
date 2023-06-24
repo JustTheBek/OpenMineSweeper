@@ -1,17 +1,17 @@
 /*!
- * @file main.c
+ * @file Gui.h
  * @author JustTheBek
  *
- * @brief Main file of the OpenMineSweeper game.
+ * @brief One line description of file
  * @details
- * This file is only used to define app entry and exit points, the functionalities
- * are implemented in the linked component libraries according to the architecture.
+ * An optional detailed description of file
  *
- * Created on: June 24, 2023
- *
- * @ingroup main
+ * @ingroup Gui
  * @{
  */
+
+#ifndef SRC_GUI_GUI_H_
+#define SRC_GUI_GUI_H_
 
 /*
  **********************************************************************
@@ -20,7 +20,6 @@
  */
 
 #include <glib.h>
-#include "Gui.h"
 
 /*
  **********************************************************************
@@ -30,57 +29,49 @@
 
 /*
  **********************************************************************
- * LOCAL MACROS
+ * GLOBAL MACROS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL DATA TYPES/STRUCTS/ENUMS
+ * GLOBAL DATA TYPES/STRUCTS/ENUMS
+ **********************************************************************
+ */
+
+/* Incomplete type used to data encapsulation*/
+typedef struct Gui_MineSweeperAppType Gui_MineSweeperAppType;
+
+/*
+ **********************************************************************
+ * GLOBAL CONSTANTS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL CONSTANTS
+ * GLOBAL VARIABLES
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL VARIABLES
+ * EXTERNALS
  **********************************************************************
  */
+
+extern Gui_MineSweeperAppType* Gui_NewMineSweeperApp (int argc, char **argv); // constructor
+
+extern void Gui_CloseMineSweeperApp (Gui_MineSweeperAppType* this); // destructor
+
+extern gint Gui_GetMineSweeperExitStatus(Gui_MineSweeperAppType* this);
 
 /*
  **********************************************************************
- * LOCAL FUNCTION PROTOTYPES
+ * GLOBAL FUNCTION PROTOTYPES
  **********************************************************************
  */
 
-/*
- **********************************************************************
- * FUNCTION IMPLEMENTATIONS
- **********************************************************************
- */
-
-int main (int argc, char **argv)
-{
-  gint guiExitStatus = 0;
-
-  // some test print
-  g_print("Hello here is OpenMineSweeper!\n");
-  Gui_MineSweeperAppType* myApp = Gui_NewMineSweeperApp(argc, argv);
-
-  guiExitStatus = Gui_GetMineSweeperExitStatus(myApp);
-
-  if(myApp != NULL) // avoids double free call
-  {
-    Gui_CloseMineSweeperApp(myApp); // deallocate memory
-    myApp = NULL;  // set ptr null, to make former allocated memory unreachable
-  }
-
-  return guiExitStatus;
-}
+#endif /* SRC_GUI_GUI_H_ */
 
 /*! @} */
