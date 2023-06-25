@@ -12,8 +12,8 @@ target_include_directories(Gui
 		./	
 )
 
-#target_link_libraries(Gui 			# add libraries which shall be linked to the target lib
-#   PUBLIC
-#   ...)     	
+target_link_libraries(Gui 			# add libraries which shall be linked to the target lib
+   PUBLIC
+   src::GameLogic)     	
 
 															  

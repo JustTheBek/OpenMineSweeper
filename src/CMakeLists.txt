@@ -1,6 +1,6 @@
 add_subdirectory(Gui/) 
 #add_subdirectory(GameManager/)  										
 #add_subdirectory(GameBoard/)  										
-#add_subdirectory(GameEngine/)  										
+add_subdirectory(GameLogic/)  										
 
 															  

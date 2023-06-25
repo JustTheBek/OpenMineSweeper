@@ -17,6 +17,7 @@
  */
 
 #include "Gui.h"
+#include "GameLogic.h"
 #include <gtk/gtk.h>
 
 /*
@@ -99,7 +100,7 @@ static void draw_function (GtkDrawingArea *area,
   cairo_fill (cr);
 }
 
-/* static function definitions */
+/* static function definitions, TODO: null  check of this */
 static void Gui_CallbackRestartButton (GtkWidget *widget, gpointer user_data)
 {
   //extract this ptr from user_data, necessary since Gtk callback params can't be chosen freely
@@ -229,10 +230,19 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   reporter = gtk_text_new_with_buffer(textBuffer);
   this->ReporterBar = reporter;
   gtk_text_set_overwrite_mode((GtkText*)reporter, (gboolean)FALSE); // TODO: disabling overwrite does not work
-  gtk_grid_attach (GTK_GRID (grid), reporter, 0, 2, 1, 1);
+  gtk_grid_attach (GTK_GRID (grid), reporter, 0, 2, 10, 1);
 
+  const Gl_GameConfigType gameConfig =
+  {
+     .Rows    = 10,
+     .Columns = 10,
+     .Difficulty = GL_DIFFICULTY_MODERATE,
+  };
+
+  Gl_GameLogicType* gameLogic = Gl_NewGameLogic(&gameConfig);
   // Draw window
   gtk_widget_show (window);
+
 }
 
 
