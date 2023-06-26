@@ -51,6 +51,19 @@ typedef gint8 Gl_FieldValueType;
 
 typedef struct
 {
+  guint16 Row;
+  guint16 Column;
+}Gl_FieldCoordinateType;
+
+typedef enum
+{
+  GL_RUNNING = 0,
+  GL_LOST,
+  GL_VICTORY,
+}Gl_GameStatusType;
+
+typedef struct
+{
   guint16 Rows;
   guint16 Columns;
   gfloat Difficulty;

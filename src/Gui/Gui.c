@@ -232,14 +232,22 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   gtk_text_set_overwrite_mode((GtkText*)reporter, (gboolean)FALSE); // TODO: disabling overwrite does not work
   gtk_grid_attach (GTK_GRID (grid), reporter, 0, 2, 10, 1);
 
+  // TODO: testing GameLogic, remove if done
   const Gl_GameConfigType gameConfig =
   {
-     .Rows    = 10,
-     .Columns = 10,
+     .Rows    = 5,
+     .Columns = 5,
      .Difficulty = GL_DIFFICULTY_MODERATE,
   };
 
   Gl_GameLogicType* gameLogic = Gl_NewGameLogic(&gameConfig);
+  Gl_FieldCoordinateType flag =
+  {
+      .Row = 0,
+      .Column = 3,
+  };
+  Gl_SetFlag(gameLogic, flag);
+  Gl_DevApi_PrintGameBoardToConsole(gameLogic, TRUE);
   // Draw window
   gtk_widget_show (window);
 
