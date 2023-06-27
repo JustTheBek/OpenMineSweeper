@@ -1,0 +1,2 @@
+# ignora ALL files in ANY directory named build
+build/
