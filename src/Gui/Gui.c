@@ -60,6 +60,8 @@ struct Gui_MineSweeperAppType
  **********************************************************************
  */
 
+cairo_surface_t *dest = NULL; // cairo surface
+
 /*
  **********************************************************************
  * LOCAL FUNCTION PROTOTYPES
@@ -87,17 +89,56 @@ static void draw_function (GtkDrawingArea *area,
                int             height,
                gpointer        data)
 {
-  GdkRGBA color = {.red = 255,
-                   .green = 255,
-                   .blue = 255,
-                   .alpha = 1};
+  cairo_set_source_surface (cr, dest, 0, 0);
+  cairo_paint (cr);
+}
 
-  cairo_rectangle (cr, 0, 0, 500,500);
+static void click (GtkGestureClick *gesture,
+         int              n_press,
+         double           x,
+         double           y,
+         GtkWidget       *area)
+{
 
-  //gtk_widget_get_color (GTK_WIDGET (area), &color);
-  gdk_cairo_set_source_rgba (cr, &color);
+  static guint16 count = 0;
+  cairo_t *cr = cairo_create (dest);
+  GdkRGBA color = {.red = 0.125+(0.5*count),
+                   .green = 0.255,
+                   .blue = 0.83,
+                   .alpha = 100};
 
-  cairo_fill (cr);
+  if(count < 3)
+  {
+    cairo_rectangle (cr, 0, 0, 500,500);
+    gdk_cairo_set_source_rgba (cr, &color);
+    cairo_fill (cr);
+  }
+  else
+  {
+    cairo_surface_t *src = cairo_image_surface_create_from_png("./cliparts/minimine.png");
+    cairo_set_source_surface (cr, src, 100, 100);
+    cairo_paint (cr);
+  }
+  cairo_destroy (cr);
+  gtk_widget_queue_draw (area);
+  count++;
+}
+
+static void resize_cb (GtkWidget *widget, int width, int height, gpointer  data)
+{
+  if (dest)
+  {
+    cairo_surface_destroy (dest);
+    dest = NULL;
+  }
+
+  if (gtk_native_get_surface (gtk_widget_get_native (widget)))
+  {
+    dest = gdk_surface_create_similar_surface (gtk_native_get_surface (gtk_widget_get_native (widget)),
+                                                  CAIRO_CONTENT_COLOR,
+                                                  gtk_widget_get_width (widget),
+                                                  gtk_widget_get_height (widget));
+  }
 }
 
 /* static function definitions, TODO: null  check of this */
@@ -223,6 +264,11 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   gtk_drawing_area_set_content_height (GTK_DRAWING_AREA (drawingArea), 500);
   gtk_drawing_area_set_draw_func (GTK_DRAWING_AREA (drawingArea), draw_function, NULL, NULL);
   gtk_grid_attach (GTK_GRID (grid), drawingArea,0, 1, 10, 1);
+  g_signal_connect_after (drawingArea, "resize", G_CALLBACK (resize_cb), NULL);
+  GtkGesture *press = gtk_gesture_click_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (press), GDK_BUTTON_SECONDARY);
+  gtk_widget_add_controller (drawingArea, GTK_EVENT_CONTROLLER (press));
+  g_signal_connect (press, "pressed", G_CALLBACK (click), drawingArea);
 
   // Create and Place Report Bar
   const char text[] = {""}; //init with empty string
@@ -231,6 +277,12 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   this->ReporterBar = reporter;
   gtk_text_set_overwrite_mode((GtkText*)reporter, (gboolean)FALSE); // TODO: disabling overwrite does not work
   gtk_grid_attach (GTK_GRID (grid), reporter, 0, 2, 10, 1);
+
+
+  //cr = cairo_create (dest);
+  //cairo_surface_t *src = cairo_image_surface_create_from_png("./cliparts/mine.png");
+  //cairo_set_source_surface (cr, src, 0, 0);
+  //cairo_destroy (cr);
 
   // TODO: testing GameLogic, remove if done
   const Gl_GameConfigType gameConfig =
@@ -248,6 +300,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   };
   Gl_SetFlag(gameLogic, flag);
   Gl_DevApi_PrintGameBoardToConsole(gameLogic, TRUE);
+
   // Draw window
   gtk_widget_show (window);
 

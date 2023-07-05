@@ -68,5 +68,6 @@ target_link_libraries(OpenMineSweeper PRIVATE src::Gui) 		  	  # link libraries 
 #add_custom_command (OUTPUT architecture.png COMMAND java -DPLANTUML_LIMIT_SIZE=8192 -jar /usr/share/plantuml/plantuml.jar -o "${CMAKE_SOURCE_DIR}/docs/"  "${CMAKE_SOURCE_DIR}/**/*.uml")
 #add_custom_target(GenerateUml COMMAND DEPENDS architecture.png)		
 
-file(COPY ./cliparts DESTINATION ./build/cliparts) # copyclipart into the build folder (the executable needs them)
+#TODO: add relative paths to build and project root (via launch.sh parameter)
+#file(COPY ./cliparts DESTINATION ./build/cliparts) # copyclipart into the build folder (the executable needs them)
 															  
