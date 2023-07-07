@@ -23,40 +23,33 @@
 
 /*
  **********************************************************************
- * DEFINES
+ * PUBLIC DEFINES
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * GLOBAL MACROS
+ * PUBLIC MACROS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * GLOBAL DATA TYPES/STRUCTS/ENUMS
- **********************************************************************
- */
-
-/* Incomplete type used to data encapsulation*/
-typedef struct Gui_MineSweeperAppType Gui_MineSweeperAppType;
-
-/*
- **********************************************************************
- * GLOBAL CONSTANTS
+ * PUBLIC DATA TYPES/STRUCTS/ENUMS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * GLOBAL VARIABLES
+ * CLASS DEFINITION
  **********************************************************************
  */
 
+typedef struct Gui_MineSweeperAppType Gui_MineSweeperAppType; /* Incomplete type used to data encapsulation*/
+
 /*
  **********************************************************************
- * EXTERNALS
+ * PUBLIC FUNCTION PROTOTYPES
  **********************************************************************
  */
 
@@ -65,12 +58,6 @@ extern Gui_MineSweeperAppType* Gui_NewMineSweeperApp (int argc, char **argv); //
 extern void Gui_CloseMineSweeperApp (Gui_MineSweeperAppType* this); // destructor
 
 extern gint Gui_GetMineSweeperExitStatus(Gui_MineSweeperAppType* this);
-
-/*
- **********************************************************************
- * GLOBAL FUNCTION PROTOTYPES
- **********************************************************************
- */
 
 #endif /* SRC_GUI_GUI_H_ */
 

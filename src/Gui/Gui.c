@@ -22,21 +22,30 @@
 
 /*
  **********************************************************************
- * DEFINES
+ * PRIVATE DEFINES
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL MACROS
+ * PRIVATE MACROS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL DATA TYPES/STRUCTS/ENUMS
+ * PRIVATE DATA TYPES/STRUCTS/ENUMS
  **********************************************************************
  */
+
+/*
+ **********************************************************************
+ * CLASS DEFINITION
+ **********************************************************************
+ */
+
+// TODO: temp global var used to experiment with cairo surface
+cairo_surface_t *dest = NULL; // cairo surface
 
 /* complete data type definition, allows encapsulation of private data */
 struct Gui_MineSweeperAppType
@@ -50,27 +59,7 @@ struct Gui_MineSweeperAppType
 
 /*
  **********************************************************************
- * LOCAL CONSTANTS
- **********************************************************************
- */
-
-/*
- **********************************************************************
- * LOCAL VARIABLES
- **********************************************************************
- */
-
-cairo_surface_t *dest = NULL; // cairo surface
-
-/*
- **********************************************************************
- * LOCAL FUNCTION PROTOTYPES
- **********************************************************************
- */
-
-/*
- **********************************************************************
- * FUNCTION IMPLEMENTATIONS
+ * PRIVATE FUNCTION PROTOTYPES
  **********************************************************************
  */
 
@@ -81,6 +70,12 @@ static void Gui_CallbackLoadGameButton (GtkWidget *widget, gpointer   data);
 static void Gui_CallbackSaveGameButton (GtkWidget *widget, gpointer   data);
 static void Gui_CallbackInfoButton (GtkWidget *widget, gpointer   data);
 static void Gui_Activate (GtkApplication *app, gpointer user_data);
+
+/*
+ **********************************************************************
+ * PRIVATE FUNCTION IMPLEMENTATIONS
+ **********************************************************************
+ */
 
 // TODO: temp function used to replace game board in early dev phase
 static void draw_function (GtkDrawingArea *area,
@@ -306,6 +301,11 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
 
 }
 
+/*
+ **********************************************************************
+ * PUBLIC FUNCTION IMPLEMENTATIONS
+ **********************************************************************
+ */
 
 Gui_MineSweeperAppType* Gui_NewMineSweeperApp (int argc, char **argv) // constructor
 {

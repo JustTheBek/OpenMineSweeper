@@ -21,7 +21,7 @@
 
 /*
  **********************************************************************
- * DEFINES
+ * PRIVATE DEFINES
  **********************************************************************
  */
 
@@ -31,13 +31,19 @@
 
 /*
  **********************************************************************
- * LOCAL MACROS
+ * PRIVATE MACROS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * LOCAL DATA TYPES/STRUCTS/ENUMS
+ * PRIVATE DATA TYPES/STRUCTS/ENUMS
+ **********************************************************************
+ */
+
+/*
+ **********************************************************************
+ * CLASS DEFINITION
  **********************************************************************
  */
 
@@ -55,19 +61,7 @@ struct Gl_GameLogicType
 
 /*
  **********************************************************************
- * LOCAL CONSTANTS
- **********************************************************************
- */
-
-/*
- **********************************************************************
- * LOCAL VARIABLES
- **********************************************************************
- */
-
-/*
- **********************************************************************
- * LOCAL FUNCTION PROTOTYPES
+ * PRIVATE FUNCTION PROTOTYPES
  **********************************************************************
  */
 
@@ -79,13 +73,13 @@ static void Gl_CalculateFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateTyp
 static void Gl_GenerateMines(Gl_GameLogicType* this);
 static void Gl_EvaluateRevealedField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
 static void Gl_CheckVictory(Gl_GameLogicType* this);
+
 /*
  **********************************************************************
- * FUNCTION IMPLEMENTATIONS
+ * PRIVATE FUNCTION IMPLEMENTATIONS
  **********************************************************************
  */
 
-// private functions
 #ifdef DEVELOPMENT_MODE
 static void Gl_PrintGameBoardToConsole(Gl_GameLogicType* this, gboolean showMines)
 {
@@ -212,8 +206,12 @@ static void Gl_CheckVictory(Gl_GameLogicType* this)
   }
 }
 
+/*
+ **********************************************************************
+ * PUBLIC FUNCTION IMPLEMENTATIONS
+ **********************************************************************
+ */
 
-// public functions
 Gl_GameLogicType* Gl_NewGameLogic(const Gl_GameConfigType* gameConfig) // constructor
 {
   Gl_GameLogicType* gameLogic = NULL;
