@@ -17,6 +17,7 @@
  */
 
 #include "Gui.h"
+#include "GameManager.h"
 #include <gtk/gtk.h>
 
 /*
@@ -53,7 +54,7 @@ struct Gui_MineSweeperAppType
   gint AppVersion; // TODO: set via CMake
   GtkApplication *GtkApp;
   GtkWidget* ReporterBar;
-  //TODO GameManager;
+  Gm_GameManagerType* GameManager;
 };
 
 /*
@@ -279,6 +280,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   //cairo_destroy (cr);
 
 
+
   // Draw window
   gtk_widget_show (window);
 
@@ -304,6 +306,8 @@ Gui_MineSweeperAppType* Gui_NewMineSweeperApp (int argc, char **argv) // constru
   {
     mineSweeper->GtkApp = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
     g_signal_connect (mineSweeper->GtkApp, "activate", G_CALLBACK (Gui_Activate), mineSweeper);
+
+    mineSweeper->GameManager = Gm_NewGameManager(); // TODO: do it maybe in the activate func??
 
     // TODO: add comand line parser which checks the arguments and ads some configs
 

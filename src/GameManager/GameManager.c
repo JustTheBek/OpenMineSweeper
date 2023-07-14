@@ -45,7 +45,7 @@
 
 struct Gm_GameManagerType
 {
-
+  Gl_GameLogicType* GameLogic;
 };
 
 /*
@@ -70,7 +70,11 @@ Gm_GameManagerType* Gm_NewGameManager(void)
 {
   Gm_GameManagerType* gameManager = NULL;
 
-  // TODO: testing GameLogic, remove if done
+  // TODO incomplete allocation, add checks as in GameLogic
+  gameManager = (Gm_GameManagerType*)g_malloc(sizeof(Gm_GameManagerType));
+
+
+  // ### TODO: testing GameLogic, remove if done and do it correctly############
   const Gl_GameConfigType gameConfig =
   {
      .Rows    = 5,
@@ -78,21 +82,33 @@ Gm_GameManagerType* Gm_NewGameManager(void)
      .Difficulty = GL_DIFFICULTY_MODERATE,
   };
 
-  Gl_GameLogicType* gameLogic = Gl_NewGameLogic(&gameConfig);
+  gameManager->GameLogic = Gl_NewGameLogic(&gameConfig);
   Gl_FieldCoordinateType flag =
   {
       .Row = 0,
       .Column = 3,
   };
-  Gl_ToggleFlag(gameLogic, flag);
-  Gl_DevApi_PrintGameBoardToConsole(gameLogic, TRUE);
+  Gl_ToggleFlag(gameManager->GameLogic, flag);
+  Gl_DevApi_PrintGameBoardToConsole(gameManager->GameLogic, TRUE);
+ // ### end of Gam logic testin block##############################################
 
   return gameManager;
 }
 
 void Gm_DestroyGameManager(Gm_GameManagerType* this)
 {
+  if(this != NULL) // avoids double free call
+  {
+    // TODO: destroy allocated children before destroying GameManager
+    Gl_DeallocateGameLogic(this->GameLogic);
+    // .... Game Board
+    // .... etc
 
+    g_free(this); // deallocate memory
+    this = NULL;  // set ptr null, to make former allocated memory unreachable
+  }
+
+  return;
 }
 
 void Gm_RevealField(Gm_GameManagerType* this)
