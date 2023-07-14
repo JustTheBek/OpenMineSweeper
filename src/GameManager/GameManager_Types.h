@@ -43,12 +43,13 @@
  **********************************************************************
  */
 
+typedef struct Gm_GameManagerType Gm_GameManagerType; /* Incomplete type used to data encapsulation*/
+
 /*
  **********************************************************************
  * PUBLIC FUNCTION PROTOTYPES
  **********************************************************************
  */
-
 
 #endif /* SRC_GAMEMANAGER_GAMEMANAGER_TYPES_H_ */
 

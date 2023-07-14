@@ -13,8 +13,8 @@ target_include_directories(GameManager
 		./	
 )
 
-#target_link_libraries(GameManager 			# add libraries which shall be linked to the target lib
-#   PUBLIC
-#   ...)  
+target_link_libraries(GameManager 			# add libraries which shall be linked to the target lib
+   PUBLIC
+   src::GameLogic)  
 
 															  

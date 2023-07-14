@@ -17,7 +17,6 @@
  */
 
 #include "Gui.h"
-#include "GameLogic.h"
 #include <gtk/gtk.h>
 
 /*
@@ -279,22 +278,6 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   //cairo_set_source_surface (cr, src, 0, 0);
   //cairo_destroy (cr);
 
-  // TODO: testing GameLogic, remove if done
-  const Gl_GameConfigType gameConfig =
-  {
-     .Rows    = 5,
-     .Columns = 5,
-     .Difficulty = GL_DIFFICULTY_MODERATE,
-  };
-
-  Gl_GameLogicType* gameLogic = Gl_NewGameLogic(&gameConfig);
-  Gl_FieldCoordinateType flag =
-  {
-      .Row = 0,
-      .Column = 3,
-  };
-  Gl_ToggleFlag(gameLogic, flag);
-  Gl_DevApi_PrintGameBoardToConsole(gameLogic, TRUE);
 
   // Draw window
   gtk_widget_show (window);
