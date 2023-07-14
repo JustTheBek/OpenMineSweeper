@@ -2,9 +2,12 @@
  * @file GameLogic.c
  * @author JustTheBek
   *
- * @brief One line description of file
+ * @brief Implementation of the GameLogic class.
  * @details
- * An optional detailed description of file
+ * Instancing an object of this class generates a new game board
+ * based on the settings forwarded to the constructor. The game
+ * can be controlled via the public functions of the class. After
+ * finishing the game the logic has to be destroyed by the destructor.
  *
  * @ingroup GameLogic
  * @{
@@ -25,15 +28,47 @@
  **********************************************************************
  */
 
+#define GL_FLAG_IS_SET                    (gboolean)TRUE
+#define GL_FLAG_IS_NOT_SET                (gboolean)FALSE
 
-#define GL_FLAG_IS_SET              (gboolean)TRUE
-#define GL_FLAG_IS_NOT_SET         (gboolean)FALSE
+#define GL_FIELD_VALUE_MASK                (guint8)0x0Fu
+#define GL_CONTROL_FLAGS_MASK              (guint8)0xF0u
+
+#define GL_MINE_SHIFT                      (guint8)4u
+#define GL_FLAG_SHIFT                      (guint8)5u
+#define GL_REVEALED_SHIFT                  (guint8)6u
+
+#define GL_MINE_BIT                        ((guint8)1u << GL_MINE_SHIFT)
+#define GL_FLAG_BIT                        ((guint8)1u << GL_FLAG_SHIFT)
+#define GL_REVEALED_BIT                    ((guint8)1u << GL_REVEALED_SHIFT)
+
+#define GL_BIT_SET                         (guint8)1u
+#define GL_BIT_CLEAN                       (guint8)0u
 
 /*
  **********************************************************************
  * PRIVATE MACROS
  **********************************************************************
  */
+
+// macros to set/get/reset bit(s) of a uint8 field
+#define GL_SET(field,bit) (field |=  bit)
+#define GL_GET(field,bit) (field &   bit)
+#define GL_CLR(field,bit) (field &= (~bit))
+
+// macros to manage flags of a game board field
+#define GL_PLACE_MINE(field)            GL_SET(field, GL_MINE_BIT)
+#define GL_CHECK_MINE(field)            GL_GET(field, GL_MINE_BIT) >> GL_MINE_SHIFT
+
+#define GL_PLACE_FLAG(field)            GL_SET(field, GL_FLAG_BIT)
+#define GL_CHECK_FLAG(field)            GL_GET(field, GL_FLAG_BIT) >> GL_FLAG_SHIFT
+#define GL_REMOVE_FLAG(field)           GL_CLR(field, GL_FLAG_BIT)
+
+#define GL_PLACE_REVEALED(field)        GL_SET(field, GL_REVEALED_BIT)
+#define GL_CHECK_REVEALED(field)        GL_GET(field, GL_REVEALED_BIT) >> GL_REVEALED_SHIFT
+
+#define GL_GET_FIELD_VALUE(field)       GL_GET(field, GL_FIELD_VALUE_MASK)
+#define GL_SET_FIELD_VALUE(field,value) GL_SET(field, (value & GL_FIELD_VALUE_MASK))
 
 /*
  **********************************************************************
@@ -51,12 +86,11 @@ struct Gl_GameLogicType
 {
   guint32 NumOfMines;
   guint32 NumOfFlags;
-  guint32 NumOfUnrevealedFields;
-  GRand* MineGenerator;
-  gboolean** FlagField;
-  Gl_FieldValueType** GameBoard;
-  Gl_GameConfigType GameConfig;
+  guint32 NumOfFieldsToReveal;   // difference of total field number - number of mines
+  Gl_FieldValueType** GameBoard; // start address of the 2D array used as gameboard
+  Gl_GameConfigType GameConfig;  //includes the user defined game presets
   Gl_GameStatusType GameStatus;
+  GRand* MineGenerator;          // random generator used to place the mines
 };
 
 /*
@@ -71,7 +105,7 @@ static void Gl_PrintGameBoardToConsole(Gl_GameLogicType* this, gboolean showMine
 
 static void Gl_CalculateFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
 static void Gl_GenerateMines(Gl_GameLogicType* this);
-static void Gl_EvaluateRevealedField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
+static gboolean Gl_EvaluateRevealedField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
 static void Gl_CheckVictory(Gl_GameLogicType* this);
 
 /*
@@ -87,11 +121,11 @@ static void Gl_PrintGameBoardToConsole(Gl_GameLogicType* this, gboolean showMine
   {
     for(guint32 col = 0; col < (guint32)this->GameConfig.Columns; col++)
     {
-      if(this->FlagField[row][col] == GL_FLAG_IS_SET)
+      if(GL_CHECK_FLAG(this->GameBoard[row][col]) == GL_BIT_SET)
       {
         g_print(" I ");
       }
-      else if(this->GameBoard[row][col] == GL_FIELD_VALUE_MINE)
+      else if(GL_CHECK_MINE(this->GameBoard[row][col]) == GL_BIT_SET)
       {
         if(showMines == TRUE)
         {
@@ -102,13 +136,13 @@ static void Gl_PrintGameBoardToConsole(Gl_GameLogicType* this, gboolean showMine
           g_print(" _ ");
         }
       }
-      else if(this->GameBoard[row][col] == GL_FIELD_VALUE_UNKOWN)
+      else if(GL_CHECK_REVEALED(this->GameBoard[row][col]) == GL_BIT_CLEAN)
       {
         g_print(" _ ");
       }
       else
       {
-        g_print(" %d ",this->GameBoard[row][col]);
+        g_print(" %d ",GL_GET_FIELD_VALUE(this->GameBoard[row][col]));
       }
     }
     g_print("\n");
@@ -120,87 +154,73 @@ static void Gl_PrintGameBoardToConsole(Gl_GameLogicType* this, gboolean showMine
 
 static void Gl_GenerateMines(Gl_GameLogicType* this)
 {
-  if(this == NULL)
-  {
-    g_print("Game Logic invalid, mine generation failed!\n");
-  }
-  else
-  {
-    guint32 numOfFields = ((guint32)this->GameConfig.Rows) * ((guint32)this->GameConfig.Columns);
-    this->NumOfMines = (guint32)(((gfloat)numOfFields) * (this->GameConfig.Difficulty));
-    this->NumOfUnrevealedFields = numOfFields-(this->NumOfMines);
-    guint32 row = 0u;
-    guint32 col = 0u;
+  guint32 numOfFields = ((guint32)this->GameConfig.Rows) * ((guint32)this->GameConfig.Columns);
+  this->NumOfMines = (guint32)(((gfloat)numOfFields) * (this->GameConfig.Difficulty));
+  this->NumOfFieldsToReveal = numOfFields-(this->NumOfMines);
+  guint32 row = 0u;
+  guint32 col = 0u;
 
-    for(guint32 mineCount = 0u; mineCount < (this->NumOfMines); mineCount++)
+  for(guint32 mineCount = 0u; mineCount < (this->NumOfMines); mineCount++)
+  {
+    gboolean mineValid = FALSE;
+
+    do
     {
-      gboolean mineValid = FALSE;
+      // generate random coordinates (with limitation)
+      row = g_rand_int_range(this->MineGenerator ,0u, (guint32)(this->GameConfig.Rows));
+      col = g_rand_int_range(this->MineGenerator ,0u, (guint32)(this->GameConfig.Columns));
 
-      do
+      // check if the coordinates are valid an if there is no mine placed
+      if(((row >=0) && (row < (this->GameConfig.Rows)))
+      &&((col >=0) && (col < (this->GameConfig.Columns)))
+      &&(GL_CHECK_MINE(this->GameBoard[row][col]) != GL_BIT_SET))
       {
-        row = g_rand_int_range(this->MineGenerator ,0u, (guint32)(this->GameConfig.Rows));
-        col = g_rand_int_range(this->MineGenerator ,0u, (guint32)(this->GameConfig.Columns));
-        if(((row >=0) && (row < (this->GameConfig.Rows)))
-        &&((col >=0) && (col < (this->GameConfig.Columns)))
-        &&(this->GameBoard[row][col] != GL_FIELD_VALUE_MINE))
-        {
-          this->GameBoard[row][col] = GL_FIELD_VALUE_MINE;
-          mineValid = TRUE;
-        }
-      }while(mineValid == FALSE);
-      mineValid = FALSE;
-    }
+        GL_PLACE_MINE(this->GameBoard[row][col]);
+        mineValid = TRUE;
+        g_print("mine: %d, %d.\n",row, col);
+      }
+    }while(mineValid == FALSE);
+    mineValid = FALSE;
   }
+  g_print("Number of mines: %d.\n",this->NumOfMines);
 }
 
 static void Gl_CalculateFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
 {
-  if(this == NULL)
-  {
-    g_print("Game Logic invalid!\n");
-  }
-  else
-  {
-    //TODO
-  }
+  //TODO: implement
 }
 
-static void Gl_EvaluateRevealedField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+static gboolean Gl_EvaluateRevealedField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
 {
-  if(this == NULL)
+  gboolean couldBeRevealed = (gboolean)TRUE;
+
+  guint16 row = FieldCoordinates.Row;
+  guint16 col = FieldCoordinates.Column;
+
+  if(GL_CHECK_MINE(this->GameBoard[row][col]) == GL_BIT_SET)
   {
-    g_print("Game Logic invalid!\n");
+    this->GameStatus = GL_LOST;
+  }
+  else if(GL_CHECK_REVEALED(this->GameBoard[row][col]) == GL_BIT_CLEAN)
+  {
+    Gl_CalculateFieldValue(this,FieldCoordinates);
+    this->NumOfFieldsToReveal--;
+    GL_PLACE_REVEALED(this->GameBoard[row][col]);
+    Gl_CheckVictory(this);
   }
   else
   {
-    Gl_FieldValueType revealedField = this->GameBoard[FieldCoordinates.Row][FieldCoordinates.Column];
-
-    switch(revealedField)
-    {
-      case GL_FIELD_VALUE_MINE:
-      {
-        this->GameStatus = GL_LOST;
-        break;
-      }
-      case GL_FIELD_VALUE_UNKOWN:
-      {
-        Gl_CalculateFieldValue(this,FieldCoordinates);
-        this->NumOfUnrevealedFields--;
-        Gl_CheckVictory(this);
-        break;
-      }
-      default:
-      {
-        g_print("Field was already revealed.\n");
-        break;
-      }
-    }
+    couldBeRevealed = FALSE;
+    g_print("Field was already revealed or is marked with a flag.\n");
   }
+
+  return couldBeRevealed;
 }
 
 static void Gl_CheckVictory(Gl_GameLogicType* this)
 {
-  if((this->NumOfUnrevealedFields == 0) && (this->NumOfFlags == this->NumOfMines))
+  // user wins only if he/she has uncovered every safe field and has marked every mine with a flag
+  if((this->NumOfFieldsToReveal == 0) && (this->NumOfFlags == this->NumOfMines))
   {
     this->GameStatus =  GL_VICTORY;
   }
@@ -233,17 +253,13 @@ Gl_GameLogicType* Gl_NewGameLogic(const Gl_GameConfigType* gameConfig) // constr
       // Store Game Config
       memcpy(&(gameLogic->GameConfig), gameConfig, sizeof(Gl_GameConfigType));
 
-      // Allocate Game Board + Flag Field and init fields with default values
+      // Allocate Game Board and init fields with default values
       gameLogic->GameBoard = (Gl_FieldValueType**)g_malloc((gameLogic->GameConfig.Rows)*sizeof(Gl_FieldValueType*));
-      gameLogic->FlagField = (gboolean**)g_malloc((gameLogic->GameConfig.Rows)*sizeof(gboolean*));
 
       for(guint32 row = 0; row < (guint32)gameLogic->GameConfig.Rows; row++)
       {
         gameLogic->GameBoard[row] = (Gl_FieldValueType*)g_malloc((gameLogic->GameConfig.Columns)*(sizeof(Gl_FieldValueType)));
-        memset(gameLogic->GameBoard[row], GL_FIELD_VALUE_UNKOWN, (gameLogic->GameConfig.Columns)*(sizeof(Gl_FieldValueType)));
-
-        gameLogic->FlagField[row] = (gboolean*)g_malloc((gameLogic->GameConfig.Columns)*(sizeof(gboolean)));
-        memset(gameLogic->FlagField[row], GL_FLAG_IS_NOT_SET, (gameLogic->GameConfig.Columns)*(sizeof(gboolean)));
+        memset(gameLogic->GameBoard[row], (guint8)0u, (gameLogic->GameConfig.Columns)*(sizeof(Gl_FieldValueType)));
       }
 
       // Generate Mines
@@ -260,15 +276,22 @@ Gl_GameLogicType* Gl_NewGameLogic(const Gl_GameConfigType* gameConfig) // constr
   return gameLogic;
 }
 
-Gl_FieldValueType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+void Gl_DeallocateGameLogic(Gl_GameLogicType* this)
 {
-  Gl_FieldValueType retVal = 0;
+  // TODO: implement destructor!
+}
 
-  if(((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
-      ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns))
-      ||(this == NULL))
+
+Gl_RevealingResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+{
+  Gl_RevealingResultType opState = GL_REVEALING_FAILED;
+
+  if((this == NULL)
+  ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
+  ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns)))
+
   {
-    g_print("Gl_GetFieldValue invalid function parameter!\n");
+    g_print("Gl_RevealField invalid function parameter(s)!\n");
   }
   else
   {
@@ -278,58 +301,103 @@ Gl_FieldValueType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType 
     }
     else
     {
-      Gl_EvaluateRevealedField(this, FieldCoordinates);
-      retVal = this->GameBoard[FieldCoordinates.Row][FieldCoordinates.Column];
+      gboolean revSucceeded = Gl_EvaluateRevealedField(this, FieldCoordinates);
+      if(revSucceeded == FALSE)
+      {
+        opState = GL_CANT_BE_REVEALED;
+      }
+      else
+      {
+        opState = GL_REVEALING_SUCCEEDED;
+      }
     }
   }
-  return retVal;
+  return opState;
 }
 
-void Gl_SetFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
 {
-  if(((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
-    ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns))
-    ||(this == NULL))
+  Gl_FlagToggleResultType opState = GL_TOGGLE_FAILED;
+
+  if((this == NULL)
+  ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
+  ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns)))
   {
-    g_print("Gl_SetFlag invalid function parameter!\n");
+    g_print("Gl_ToggleFlag invalid function parameter(s)!\n");
   }
   else
   {
     guint16 row = FieldCoordinates.Row;
     guint16 col = FieldCoordinates.Column;
 
-    // flag will be set only if it was not set yet and if the field is still not revealed
-    if((this->FlagField[row][col] == GL_FLAG_IS_NOT_SET) &&
-        ((this->GameBoard[row][col] == GL_FIELD_VALUE_UNKOWN) || (this->GameBoard[row][col] == GL_FIELD_VALUE_MINE)))
+    // flag will be toggled only if it the field is still not revealed
+    if(GL_CHECK_REVEALED(this->GameBoard[row][col]) == GL_BIT_SET)
     {
-      this->FlagField[row][col] = GL_FLAG_IS_SET;
-      this->NumOfFlags++;
+      opState = GL_CANT_BE_TOGGLED;
+    }
+    else
+    {
+      switch(GL_CHECK_FLAG(this->GameBoard[row][col]))
+      {
+        case GL_BIT_SET:
+        {
+          GL_REMOVE_FLAG(this->GameBoard[row][col]);
+          this->NumOfFlags--;
+          opState = GL_TOGGLE_SUCCEEDED;
+          break;
+        }
+        case GL_BIT_CLEAN:
+        {
+          GL_PLACE_FLAG(this->GameBoard[row][col]);
+          this->NumOfFlags++;
+          opState = GL_TOGGLE_SUCCEEDED;
+          break;
+        }
+        default:
+        {
+          // does nothing if flag value is invalid
+          g_print("Stored flag value invalid! Flag can't be toggled.\n");
+          break;
+        }
+      }
       Gl_CheckVictory(this);
     }
   }
+  return opState;
 }
 
-void Gl_ResetFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+Gl_GetFieldValResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates, Gl_FieldValueType* fieldValue)
 {
-  if(((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
-    ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns))
-    ||(this == NULL))
+  Gl_GetFieldValResultType opState = GL_OPERATION_FAILED;
+
+  if((this == NULL)
+  ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
+  ||((FieldCoordinates.Column < 0) || (FieldCoordinates.Column >= this->GameConfig.Columns)))
+
   {
-    g_print("Gl_ResetFlag invalid function parameter!\n");
+    g_print("Gl_GetFieldValue invalid function parameter(s)!\n");
   }
   else
   {
     guint16 row = FieldCoordinates.Row;
     guint16 col = FieldCoordinates.Column;
+    opState = GL_OPERATION_SUCCEEDED;
 
-    // flag will be reset only if it was set previously and if the field is still not reveald
-    if((this->FlagField[row][col] == GL_FLAG_IS_SET) &&
-        ((this->GameBoard[row][col] == GL_FIELD_VALUE_UNKOWN) || (this->GameBoard[row][col] == GL_FIELD_VALUE_MINE)))
+    if(this->GameStatus != GL_RUNNING)
     {
-      this->FlagField[row][col] = GL_FLAG_IS_NOT_SET;
-      this->NumOfFlags--;
+      *fieldValue = this->GameBoard[row][col];
+    }
+    else if(GL_CHECK_REVEALED(this->GameBoard[row][col]) == GL_BIT_SET)
+    {
+      *fieldValue = this->GameBoard[row][col];
+    }
+    else
+    {
+      opState = GL_OPERATION_NOT_ALLOWED;
+      *fieldValue = (guint8)0xFFu;
     }
   }
+  return opState;
 }
 
 guint32 Gl_GetNumberOfMines(Gl_GameLogicType* this)

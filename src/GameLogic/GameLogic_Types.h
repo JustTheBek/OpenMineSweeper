@@ -27,9 +27,6 @@
  **********************************************************************
  */
 
-#define GL_FIELD_VALUE_MINE              G_MININT8
-#define GL_FIELD_VALUE_UNKOWN            G_MAXINT8
-
 // difficulty represents the amount of mines in percentage
 #define GL_DIFFICULTY_EASY             (gfloat)0.10
 #define GL_DIFFICULTY_MODERATE         (gfloat)0.20
@@ -47,7 +44,21 @@
  **********************************************************************
  */
 
-typedef gint8 Gl_FieldValueType;
+/*
+ * The field value is the main data type of the mine sweeper logic.
+ * It represents a single field on the game board and stores every
+ * information about it which is needed by a game logic instance
+ * to evaluate the result of a step applied on the chosen field.
+ *
+ * The interpretation of the bits of a field value is the following:
+ * MSB --[x][r][f][m][v3][v2][v1][v0] -- LSB
+ * [x] - unused bit
+ * [r] - revealed bit: field was revealed (1) / is still unknown(0)
+ * [f] - flag bit: field is marked with a flag (1) / or not (0)
+ * [m] - mine bit: field holdas a mine (1) / holds no mine (1)
+ * [v3-0] - field value: number of mines next to the field (max 8)
+ */
+typedef guint8 Gl_FieldValueType;
 
 typedef struct
 {
@@ -61,6 +72,27 @@ typedef enum
   GL_LOST,
   GL_VICTORY,
 }Gl_GameStatusType;
+
+typedef enum
+{
+  GL_CANT_BE_REVEALED = 0, // field is already revealed or is marked with a flag
+  GL_REVEALING_FAILED,     // an error happened during the function call (invalid input)
+  GL_REVEALING_SUCCEEDED,
+}Gl_RevealingResultType;
+
+typedef enum
+{
+  GL_CANT_BE_TOGGLED = 0, // already revealed field
+  GL_TOGGLE_FAILED,       // an error happened during the function call (invalid input)
+  GL_TOGGLE_SUCCEEDED,
+}Gl_FlagToggleResultType;
+
+typedef enum
+{
+  GL_OPERATION_NOT_ALLOWED = 0, // if game is running only revealed field values can be read
+  GL_OPERATION_FAILED,          // an error happened during the function call (invalid input)
+  GL_OPERATION_SUCCEEDED,
+}Gl_GetFieldValResultType;
 
 typedef struct
 {

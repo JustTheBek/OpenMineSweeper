@@ -293,7 +293,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
       .Row = 0,
       .Column = 3,
   };
-  Gl_SetFlag(gameLogic, flag);
+  Gl_ToggleFlag(gameLogic, flag);
   Gl_DevApi_PrintGameBoardToConsole(gameLogic, TRUE);
 
   // Draw window
