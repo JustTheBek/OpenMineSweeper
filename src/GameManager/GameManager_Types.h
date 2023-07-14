@@ -1,14 +1,17 @@
 /*!
- * @file GameManager.c
+ * @file GameManager_Types.h
  * @author JustTheBek
-  *
- * @brief Implementation of the GameManager class.
+ *
+ * @brief One line description of file
  * @details
  * An optional detailed description of file
  *
- * @ingroup GameManager
+ * @ingroup GameManager_Types
  * @{
  */
+
+#ifndef SRC_GAMEMANAGER_GAMEMANAGER_TYPES_H_
+#define SRC_GAMEMANAGER_GAMEMANAGER_TYPES_H_
 
 /*
  **********************************************************************
@@ -16,23 +19,21 @@
  **********************************************************************
  */
 
-#include "GameManager.h"
-
 /*
  **********************************************************************
- * PRIVATE DEFINES
+ * PUBLIC DEFINES
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * PRIVATE MACROS
+ * PUBLIC MACROS
  **********************************************************************
  */
 
 /*
  **********************************************************************
- * PRIVATE DATA TYPES/STRUCTS/ENUMS
+ * PUBLIC DATA TYPES/STRUCTS/ENUMS
  **********************************************************************
  */
 
@@ -44,20 +45,11 @@
 
 /*
  **********************************************************************
- * PRIVATE FUNCTION PROTOTYPES
+ * PUBLIC FUNCTION PROTOTYPES
  **********************************************************************
  */
 
-/*
- **********************************************************************
- * PRIVATE FUNCTION IMPLEMENTATIONS
- **********************************************************************
- */
 
-/*
- **********************************************************************
- * PUBLIC FUNCTION IMPLEMENTATIONS
- **********************************************************************
- */
+#endif /* SRC_GAMEMANAGER_GAMEMANAGER_TYPES_H_ */
 
 /*! @} */
