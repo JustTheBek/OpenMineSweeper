@@ -281,10 +281,9 @@ void Gl_DeallocateGameLogic(Gl_GameLogicType* this)
   // TODO: implement destructor!
 }
 
-
-Gl_RevealingResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+Gl_OperationResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
 {
-  Gl_RevealingResultType opState = GL_REVEALING_FAILED;
+  Gl_OperationResultType opState = GL_OPERATION_FAILED;
 
   if((this == NULL)
   ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
@@ -304,20 +303,21 @@ Gl_RevealingResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinate
       gboolean revSucceeded = Gl_EvaluateRevealedField(this, FieldCoordinates);
       if(revSucceeded == FALSE)
       {
-        opState = GL_CANT_BE_REVEALED;
+        // field is already revealed or is marked with a flag
+        opState = GL_OPERATION_NOT_SUPPORTED;
       }
       else
       {
-        opState = GL_REVEALING_SUCCEEDED;
+        opState = GL_OPERATION_SUCCEEDED;
       }
     }
   }
   return opState;
 }
 
-Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
+Gl_OperationResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates)
 {
-  Gl_FlagToggleResultType opState = GL_TOGGLE_FAILED;
+  Gl_OperationResultType opState = GL_OPERATION_FAILED;
 
   if((this == NULL)
   ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
@@ -333,7 +333,8 @@ Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinate
     // flag will be toggled only if it the field is still not revealed
     if(GL_CHECK_REVEALED(this->GameBoard[row][col]) == GL_BIT_SET)
     {
-      opState = GL_CANT_BE_TOGGLED;
+      // already revealed field
+      opState = GL_OPERATION_NOT_SUPPORTED;
     }
     else
     {
@@ -343,14 +344,14 @@ Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinate
         {
           GL_REMOVE_FLAG(this->GameBoard[row][col]);
           this->NumOfFlags--;
-          opState = GL_TOGGLE_SUCCEEDED;
+          opState = GL_OPERATION_SUCCEEDED;
           break;
         }
         case GL_BIT_CLEAN:
         {
           GL_PLACE_FLAG(this->GameBoard[row][col]);
           this->NumOfFlags++;
-          opState = GL_TOGGLE_SUCCEEDED;
+          opState = GL_OPERATION_SUCCEEDED;
           break;
         }
         default:
@@ -366,9 +367,9 @@ Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinate
   return opState;
 }
 
-Gl_GetFieldValResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates, Gl_FieldValueType* fieldValue)
+Gl_OperationResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates, Gl_FieldValueType* fieldValue)
 {
-  Gl_GetFieldValResultType opState = GL_OPERATION_FAILED;
+  Gl_OperationResultType opState = GL_OPERATION_FAILED;
 
   if((this == NULL)
   ||((FieldCoordinates.Row < 0) || (FieldCoordinates.Row >= this->GameConfig.Rows))
@@ -393,7 +394,8 @@ Gl_GetFieldValResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordi
     }
     else
     {
-      opState = GL_OPERATION_NOT_ALLOWED;
+      // if game is running only revealed field values can be read
+      opState = GL_OPERATION_NOT_SUPPORTED;
       *fieldValue = (guint8)0xFFu;
     }
   }

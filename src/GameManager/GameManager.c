@@ -16,6 +16,7 @@
  **********************************************************************
  */
 
+#include <glib.h>
 #include "GameManager.h"
 #include "GameLogic.h"
 
@@ -113,37 +114,80 @@ void Gm_DestroyGameManager(Gm_GameManagerType* this)
 
 void Gm_RevealField(Gm_GameManagerType* this)
 {
+  Gl_OperationResultType retVal = Gl_RevealField(this->GameLogic,0,0);
 
+  switch(retVal)
+  {
+    case GL_OPERATION_SUCCEEDED:
+    {
+      // check field value and handle accordingly (use recursion to discover and draw other field)
+      break;
+    }
+    case GL_OPERATION_NOT_SUPPORTED:
+    {
+      // nothing shall happen, neglect operation
+      break;
+    }
+    default:
+    {
+      // finish game
+      break;
+    }
+  }
 }
 
 void Gm_ToggleFlag(Gm_GameManagerType* this)
 {
+  Gl_OperationResultType retVal = Gl_RevealField(this->GameLogic,0,0);
 
+  switch(retVal)
+  {
+    case GL_OPERATION_SUCCEEDED:
+    {
+      // set/reset flag symbol on given field
+      break;
+    }
+    case GL_OPERATION_NOT_SUPPORTED:
+    {
+      // nothing shall happen, neglect operation
+      break;
+    }
+    default:
+    {
+      // finish game
+      break;
+    }
+  }
 }
 
 void Gm_RestartGame(Gm_GameManagerType* this)
 {
-
+  // TODO: add implementation
+  g_print("Functionality not implemented yet!\n");
 }
 
 void Gm_NewGame(Gm_GameManagerType* this)
 {
-
+  // TODO: add implementation
+  g_print("Functionality not implemented yet!\n");
 }
 
 void Gm_LoadGame(Gm_GameManagerType* this)
 {
-
+  // TODO: add implementation
+  g_print("Functionality not implemented yet!\n");
 }
 
 void Gm_SaveGame(Gm_GameManagerType* this)
 {
-
+  // TODO: add implementation
+  g_print("Functionality not implemented yet!\n");
 }
 
 void Gm_InformationRequest(Gm_GameManagerType* this)
 {
-
+  // TODO: add implementation
+  g_print("Functionality not implemented yet!\n");
 }
 
 /*! @} */

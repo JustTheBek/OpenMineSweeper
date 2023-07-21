@@ -72,20 +72,13 @@ extern void Gl_DeallocateGameLogic(Gl_GameLogicType* this); // destructor
  *  Function is used to reveal a field on the game board. The function returns only the result of the operation
  *  (according to Gl_RevealingResultType) but not the field value itself, that can be read via the get field method of the class.
  */
-extern Gl_RevealingResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
+extern Gl_OperationResultType Gl_RevealField(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
 
 /*
  * Toggles flag if the field was not revealed yet and if the forwarded parameters are valid.
  * Returns result of operation according to the definition of Gl_FlagToggleResultType.
  */
-extern Gl_FlagToggleResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
-
-/*
- * Returns the number of the mines created by the constructor during instancing the object. If a null pointer
- * is forwarded the function returns 0 since there are always some mines even in the easiest game mode.
- */
-extern guint32 Gl_GetNumberOfMines(Gl_GameLogicType* this);
-
+extern Gl_OperationResultType Gl_ToggleFlag(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates);
 
 /*
  * If game is running: Returns the value of the field marked by the forwarded coordinates, but only it
@@ -93,7 +86,13 @@ extern guint32 Gl_GetNumberOfMines(Gl_GameLogicType* this);
  * If game is lost/won: Returns the value of the field marked by the forwarded coordinates, also if the field
  * was unknown before.
  */
-extern Gl_GetFieldValResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates, Gl_FieldValueType* fieldValue);
+extern Gl_OperationResultType Gl_GetFieldValue(Gl_GameLogicType* this, Gl_FieldCoordinateType FieldCoordinates, Gl_FieldValueType* fieldValue);
+
+/*
+ * Returns the number of the mines created by the constructor during instancing the object. If a null pointer
+ * is forwarded the function returns 0 since there are always some mines even in the easiest game mode.
+ */
+extern guint32 Gl_GetNumberOfMines(Gl_GameLogicType* this);
 
 /*
  * Returns the game status according to the definition of the Gl_GameStatusType. If a null pointer is

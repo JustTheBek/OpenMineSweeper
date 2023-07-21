@@ -75,24 +75,10 @@ typedef enum
 
 typedef enum
 {
-  GL_CANT_BE_REVEALED = 0, // field is already revealed or is marked with a flag
-  GL_REVEALING_FAILED,     // an error happened during the function call (invalid input)
-  GL_REVEALING_SUCCEEDED,
-}Gl_RevealingResultType;
-
-typedef enum
-{
-  GL_CANT_BE_TOGGLED = 0, // already revealed field
-  GL_TOGGLE_FAILED,       // an error happened during the function call (invalid input)
-  GL_TOGGLE_SUCCEEDED,
-}Gl_FlagToggleResultType;
-
-typedef enum
-{
-  GL_OPERATION_NOT_ALLOWED = 0, // if game is running only revealed field values can be read
-  GL_OPERATION_FAILED,          // an error happened during the function call (invalid input)
-  GL_OPERATION_SUCCEEDED,
-}Gl_GetFieldValResultType;
+  GL_OPERATION_NOT_SUPPORTED = 0, // operation is not allowed to execute in the current game state
+  GL_OPERATION_FAILED,            // an error happened during the function call (invalid input)
+  GL_OPERATION_SUCCEEDED,         // operation was executed successfully
+}Gl_OperationResultType;
 
 typedef struct
 {
