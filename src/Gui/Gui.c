@@ -115,7 +115,7 @@ static void Gui_CallbackLeftKlick (GtkGestureClick *self, gint n_press, gdouble 
 
   Gm_KlickCoordinateType klickCoordinates = {x,y};
 
-  Gm_ToggleFlag(this->GameManager, klickCoordinates);
+  Gm_RevealField(this->GameManager, klickCoordinates);
 
   //##########################################################################################
   // TODO: temp calback testing block
