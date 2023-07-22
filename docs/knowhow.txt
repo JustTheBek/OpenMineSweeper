@@ -1,0 +1,54 @@
+This file is intended to document the most important links and articles I used during the development of OpenMineSweeper. Since I used GTK4.0 (also named as GTK+) the information in the links applies only to that specific library version. In case of Cairo the library variant was used.
+
+GTK (4.0) button handling
+    
+    GTK+ events and signals in general (incl examples):
+        https://zetcode.com/gui/gtk2/gtkevents/?utm_content=cmp-true
+
+
+    add controller to widget so it receives events:
+        https://docs.gtk.org/gtk4/method.Widget.add_controller.html
+
+    click-pressed:
+        https://docs.gtk.org/gtk4/class.GestureClick.html
+        https://docs.gtk.org/gtk4/signal.GestureClick.pressed.html
+    drag:
+        https://docs.gtk.org/gtk4/class.GestureDrag.html
+        https://docs.gtk.org/gtk4/signal.GestureDrag.drag-begin.html
+
+    using data field param of g_signal_connect:
+        https://stackoverflow.com/questions/43303990/c-gtk-g-signal-connect-using-the-data-field
+
+
+GTK (4.0) drawing
+
+    drawing area:
+        https://docs.gtk.org/gtk4/class.DrawingArea.html
+
+    set draw function:
+        https://docs.gtk.org/gtk4/method.DrawingArea.set_draw_func.html
+
+    queue_draw:
+        https://docs.gtk.org/gtk4/method.Widget.queue_draw.html
+
+Cairo
+    
+    Drawing with Cairo intro:
+        https://www.cairographics.org/tutorial/
+    Image surface:
+        https://cairographics.org/manual/cairo-Image-Surfaces.html
+    PNG Support:
+        https://www.cairographics.org/manual-1.0.2/cairo-PNG-Support.html
+    FAQ: How do I paint from one surface to another?
+        https://www.cairographics.org/FAQ/#paint_from_a_surface
+    cairo_set_source_surface:
+        https://rdrr.io/github/coolbutuseless/cairocore/man/cairo_set_source_surface.html
+    
+Misc
+
+    GTK grid:
+        https://docs.gtk.org/gtk4/method.Grid.set_baseline_row.ht
+    text set buffer:
+        https://docs.gtk.org/gtk4/method.Text.set_buffer.html
+    Header Bar:
+        https://docs.gtk.org/gtk3/ctor.HeaderBar.new.html

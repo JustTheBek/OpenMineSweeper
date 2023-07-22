@@ -245,14 +245,17 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   GtkWidget *grid;
   GtkWidget *drawingArea;
 
+
   /* create a new window, and set its title */
   window = gtk_application_window_new (app);
   gtk_window_set_title (GTK_WINDOW (window), "OpenMineSweeper");
   gtk_window_set_default_size(GTK_WINDOW (window), 500, 520);
 
+
   // Construct Grid of Buttons and Reporter Grid, pack the Container in the Window
   grid = gtk_grid_new ();
   gtk_window_set_child (GTK_WINDOW (window), grid);
+
 
   // Create and place Buttons
   button = gtk_button_new();
@@ -285,6 +288,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   image = gtk_image_new_from_file ("./cliparts/info.png");
   gtk_button_set_child (GTK_BUTTON (button), image);
 
+
   // TODO: Temporary drawing area used to experiment with grid and widget positioning
   drawingArea = gtk_drawing_area_new ();
   gtk_drawing_area_set_content_width (GTK_DRAWING_AREA (drawingArea), 500);
@@ -293,6 +297,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   gtk_grid_attach (GTK_GRID (grid), drawingArea,0, 1, 10, 1);
   g_signal_connect_after (drawingArea, "resize", G_CALLBACK (resize_cb), NULL);
   this->DrawingArea = drawingArea;
+
 
   // Defining left button click
   GtkGesture *leftClick = gtk_gesture_click_new ();
@@ -306,6 +311,7 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (rightClick), GDK_BUTTON_SECONDARY);
   gtk_widget_add_controller (drawingArea, GTK_EVENT_CONTROLLER (rightClick));
   g_signal_connect (rightClick, "pressed", G_CALLBACK (Gui_CallbackRightKlick), this);
+
 
   // Create and Place Report Bar
   const char text[] = {""}; //init with empty string
