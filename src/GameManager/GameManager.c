@@ -112,9 +112,11 @@ void Gm_DestroyGameManager(Gm_GameManagerType* this)
   return;
 }
 
-void Gm_RevealField(Gm_GameManagerType* this)
+void Gm_RevealField(Gm_GameManagerType* this, Gm_KlickCoordinateType coordinates)
 {
-  Gl_OperationResultType retVal = Gl_RevealField(this->GameLogic,0,0);
+  Gl_FieldCoordinateType fieldCoordinates = {0,0};
+  // TODO: calculate fieldCoordinates from klickCoordinates
+  Gl_OperationResultType retVal = Gl_RevealField(this->GameLogic, fieldCoordinates);
 
   switch(retVal)
   {
@@ -136,9 +138,11 @@ void Gm_RevealField(Gm_GameManagerType* this)
   }
 }
 
-void Gm_ToggleFlag(Gm_GameManagerType* this)
+void Gm_ToggleFlag(Gm_GameManagerType* this, Gm_KlickCoordinateType coordinates)
 {
-  Gl_OperationResultType retVal = Gl_RevealField(this->GameLogic,0,0);
+  Gl_FieldCoordinateType fieldCoordinates = {0,0};
+  // TODO: calculate fieldCoordinates from klickCoordinates
+  Gl_OperationResultType retVal = Gl_ToggleFlag(this->GameLogic, fieldCoordinates);
 
   switch(retVal)
   {

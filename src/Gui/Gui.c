@@ -50,11 +50,12 @@ cairo_surface_t *dest = NULL; // cairo surface
 /* complete data type definition, allows encapsulation of private data */
 struct Gui_MineSweeperAppType
 {
-  gint ExitStatus;
-  gint AppVersion; // TODO: set via CMake
-  GtkApplication *GtkApp;
-  GtkWidget* ReporterBar;
-  Gm_GameManagerType* GameManager;
+  gint ExitStatus;                  // return value of the GTK app
+  gint AppVersion;                  // TODO: set via CMake
+  GtkApplication *GtkApp;           // the GUI application
+  GtkWidget* ReporterBar;           // small text output bar
+  GtkWidget* DrawingArea;           // area where the game board will be drawn
+  Gm_GameManagerType* GameManager;  // GUI can control the game via this manager
 };
 
 /*
@@ -63,7 +64,8 @@ struct Gui_MineSweeperAppType
  **********************************************************************
  */
 
-/* static function declarations */
+static void Gui_CallbackLeftKlick (GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer *user_data);
+static void Gui_CallbackRightKlick (GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer *user_data);
 static void Gui_CallbackRestartButton (GtkWidget *widget, gpointer   data);
 static void Gui_CallbackNewGameButton (GtkWidget *widget, gpointer   data);
 static void Gui_CallbackLoadGameButton (GtkWidget *widget, gpointer   data);
@@ -88,13 +90,35 @@ static void draw_function (GtkDrawingArea *area,
   cairo_paint (cr);
 }
 
-static void click (GtkGestureClick *gesture,
-         int              n_press,
-         double           x,
-         double           y,
-         GtkWidget       *area)
+static void resize_cb (GtkWidget *widget, int width, int height, gpointer  data)
 {
+  if (dest)
+  {
+    cairo_surface_destroy (dest);
+    dest = NULL;
+  }
 
+  if (gtk_native_get_surface (gtk_widget_get_native (widget)))
+  {
+    dest = gdk_surface_create_similar_surface (gtk_native_get_surface (gtk_widget_get_native (widget)),
+                                                  CAIRO_CONTENT_COLOR,
+                                                  gtk_widget_get_width (widget),
+                                                  gtk_widget_get_height (widget));
+  }
+}
+
+// Interface based on: https://docs.gtk.org/gtk4/signal.GestureClick.pressed.html
+static void Gui_CallbackLeftKlick (GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer *user_data)
+{
+  //extract this ptr from user_data, necessary since Gtk callback params can't be chosen freely
+  Gui_MineSweeperAppType* this = (Gui_MineSweeperAppType*) user_data;
+
+  Gm_KlickCoordinateType klickCoordinates = {x,y};
+
+  Gm_ToggleFlag(this->GameManager, klickCoordinates);
+
+  //##########################################################################################
+  // TODO: temp calback testing block
   static guint16 count = 0;
   cairo_t *cr = cairo_create (dest);
   GdkRGBA color = {.red = 0.125+(0.5*count),
@@ -115,25 +139,33 @@ static void click (GtkGestureClick *gesture,
     cairo_paint (cr);
   }
   cairo_destroy (cr);
-  gtk_widget_queue_draw (area);
+  gtk_widget_queue_draw (this->DrawingArea);
   count++;
+  // end of calback testing block
+  //##########################################################################################
 }
 
-static void resize_cb (GtkWidget *widget, int width, int height, gpointer  data)
+// Interface based on: https://docs.gtk.org/gtk4/signal.GestureClick.pressed.html
+static void Gui_CallbackRightKlick (GtkGestureClick *self, gint n_press, gdouble x, gdouble y, gpointer *user_data)
 {
-  if (dest)
-  {
-    cairo_surface_destroy (dest);
-    dest = NULL;
-  }
+  //extract this ptr from user_data, necessary since Gtk callback params can't be chosen freely
+  Gui_MineSweeperAppType* this = (Gui_MineSweeperAppType*) user_data;
 
-  if (gtk_native_get_surface (gtk_widget_get_native (widget)))
-  {
-    dest = gdk_surface_create_similar_surface (gtk_native_get_surface (gtk_widget_get_native (widget)),
-                                                  CAIRO_CONTENT_COLOR,
-                                                  gtk_widget_get_width (widget),
-                                                  gtk_widget_get_height (widget));
-  }
+  Gm_KlickCoordinateType klickCoordinates = {x,y};
+
+  Gm_ToggleFlag(this->GameManager, klickCoordinates);
+
+  //##########################################################################################
+  // TODO: temp calback testing block
+  cairo_t *cr = cairo_create (dest);
+  cairo_surface_t *src = cairo_image_surface_create_from_png("./cliparts/miniflag.png");
+  cairo_set_source_surface (cr, src, 300, 40);
+  cairo_paint (cr);
+
+  cairo_destroy (cr);
+  gtk_widget_queue_draw (this->DrawingArea);
+  // end of calback testing block
+  //##########################################################################################
 }
 
 /* static function definitions, TODO: null  check of this */
@@ -260,10 +292,20 @@ static void Gui_Activate (GtkApplication *app, gpointer user_data)
   gtk_drawing_area_set_draw_func (GTK_DRAWING_AREA (drawingArea), draw_function, NULL, NULL);
   gtk_grid_attach (GTK_GRID (grid), drawingArea,0, 1, 10, 1);
   g_signal_connect_after (drawingArea, "resize", G_CALLBACK (resize_cb), NULL);
-  GtkGesture *press = gtk_gesture_click_new ();
-  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (press), GDK_BUTTON_SECONDARY);
-  gtk_widget_add_controller (drawingArea, GTK_EVENT_CONTROLLER (press));
-  g_signal_connect (press, "pressed", G_CALLBACK (click), drawingArea);
+  this->DrawingArea = drawingArea;
+
+  // Defining left button click
+  GtkGesture *leftClick = gtk_gesture_click_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (leftClick), GDK_BUTTON_PRIMARY);
+  gtk_widget_add_controller (drawingArea, GTK_EVENT_CONTROLLER (leftClick));
+  g_signal_connect (leftClick, "pressed", G_CALLBACK (Gui_CallbackLeftKlick), this);
+
+
+  // Defining right button click
+  GtkGesture *rightClick = gtk_gesture_click_new ();
+  gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (rightClick), GDK_BUTTON_SECONDARY);
+  gtk_widget_add_controller (drawingArea, GTK_EVENT_CONTROLLER (rightClick));
+  g_signal_connect (rightClick, "pressed", G_CALLBACK (Gui_CallbackRightKlick), this);
 
   // Create and Place Report Bar
   const char text[] = {""}; //init with empty string

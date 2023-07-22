@@ -55,9 +55,9 @@ extern Gm_GameManagerType* Gm_NewGameManager(void);
 
 extern void Gm_DestroyGameManager(Gm_GameManagerType* this);
 
-extern void Gm_RevealField(Gm_GameManagerType* this);
+extern void Gm_RevealField(Gm_GameManagerType* this, Gm_KlickCoordinateType coordinates);
 
-extern void Gm_ToggleFlag(Gm_GameManagerType* this);
+extern void Gm_ToggleFlag(Gm_GameManagerType* this, Gm_KlickCoordinateType coordinates);
 
 extern void Gm_RestartGame(Gm_GameManagerType* this);
 
