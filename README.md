@@ -25,5 +25,6 @@ Currently building on Linux and Windows is supported.
 ## Appearance
 
 Current look of the game:
+
 ![image](https://github.com/JustTheBek/OpenMineSweeper/assets/75273840/92d15008-6bbb-43ee-8686-ada7288628d9)
 
