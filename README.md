@@ -10,3 +10,20 @@ To keep the code portable between different platforms the features of the genera
 
 For build-process management and build environment generation the [CMake](https://cmake.org/) tool suite was used.
 
+# Build Environment
+
+Currently building on Linux and Windows is supported.
+
+## Linux Build
+...
+
+## Windows Build
+
+# Features
+...
+
+## Appearance
+
+Current look of the game:
+![image](https://github.com/JustTheBek/OpenMineSweeper/assets/75273840/92d15008-6bbb-43ee-8686-ada7288628d9)
+
